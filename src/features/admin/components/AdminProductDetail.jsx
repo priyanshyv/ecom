@@ -2,10 +2,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { StarIcon } from '@heroicons/react/20/solid'
+import { StarIcon } from '@heroicons/react/24/solid'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchAllProductByIdAsync, selectProductById } from '../../product/ProductSlice'
+import { fetchProductByIdAsync, selectProductById } from '../../product/ProductSlice'
 import { useParams } from 'react-router-dom'
 import { addToCartAsync } from '../../cart/CartSlice'
 import { selectLoggedInUser } from '../../auth/AuthSlice'
@@ -53,7 +53,7 @@ export default function AdminProductDetail() {
     dispatch(addToCartAsync(newItem));
   }
   useEffect(()=>{
-    dispatch(fetchAllProductByIdAsync(params.id));
+    dispatch(fetchProductByIdAsync(params.id));
 
   },[dispatch,params.id])
   //todo: in server data we will add colors ,sizes,highlight etc

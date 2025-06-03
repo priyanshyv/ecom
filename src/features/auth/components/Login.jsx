@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-
 import { Link, Navigate } from 'react-router-dom';
-import { checkUserAsync, selectError ,selectLoggedInUser} from '../AuthSlice';
+import { checkUserAsync, selectError, selectLoggedInUser } from '../AuthSlice';
 import { useForm } from 'react-hook-form';
-
+import { motion } from 'framer-motion';
 
 export default function Login() {
   const user = useSelector(selectLoggedInUser);
@@ -12,93 +11,143 @@ export default function Login() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm()
-  
-  console.log(errors);
+  } = useForm();
   const dispatch = useDispatch();
-  
+
+  if (user) {
+    return <Navigate to='/' replace={true} />;
+  }
 
   return (
-    <>
-    {user && <Navigate to='/' replace={true}></Navigate>}
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          alt="Your Company"
-          src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-          className="mx-auto h-10 w-auto"
-        />
-        <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-          Log in to your account
-        </h2>
-      </div>
+    <div className="min-h-screen bg-white flex flex-col justify-center">
+      <div className="mx-auto w-full max-w-md px-6">
+        <div className="text-center mb-8">
+          <svg 
+            className="mx-auto h-12 w-12 text-pink-400" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" 
+            />
+          </svg>
+          <h1 className="mt-4 text-2xl font-light text-gray-900">
+            Welcome back
+          </h1>
+        </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form noValidate onSubmit={handleSubmit((data)=>{
-          dispatch(
-            checkUserAsync({email:data.email,password:data.password})
-            )
-          console.log(data);
-        })} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-              Email address
-            </label>
-            <div className="mt-2">
-              <input
-                id="email"
-                {...register("email",{required:"email is required", pattern:{value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,message:"email is not valid"} },
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white py-8 px-6 shadow-sm border border-gray-100 rounded-lg"
+        >
+          <form onSubmit={handleSubmit((data) => {
+            dispatch(checkUserAsync({ email: data.email, password: data.password }));
+          })}>
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="email"
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: "Invalid email format"
+                      }
+                    })}
+                    type="email"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-pink-600">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-xs font-medium text-pink-500 hover:text-pink-700"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="mt-1">
+                  <input
+                    id="password"
+                    {...register("password", {
+                      required: "Password is required"
+                    })}
+                    type="password"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
+                  />
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-pink-600">
+                      {errors.password.message}
+                    </p>
+                  )}
+                </div>
+                {error && (
+                  <p className="mt-2 text-sm text-pink-600">
+                    {error.message}
+                  </p>
                 )}
-                type="email"
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-              />
-              {errors.email && <p className='text-red-500'>{errors.email.message}</p>}
-            </div>
-          </div>
+              </div>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
-                Password
-              </label>
-              <div className="text-sm">
-                <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                  Forgot password?
-                </a>
+              <div>
+                <button
+                  type="submit"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-500 hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors"
+                >
+                  Sign in
+                </button>
               </div>
             </div>
-            <div className="mt-2">
-              <input
-                id="password"
-                {...register("password",{required:"password is required"})}
-                type="password"
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-              />
-              {errors.password && <p className='text-red-500'>{errors.password.message}</p>}
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  Don't have an account?
+                </span>
+              </div>
             </div>
-            {error && (<p className='text-red-500'>{error.message}</p>)}
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              Log in
-            </button>
+            <div className="mt-4">
+              <Link
+                to="/signup"
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+              >
+                Create account
+              </Link>
+            </div>
           </div>
-        </form>
+        </motion.div>
 
-        <p className="mt-10 text-center text-sm/6 text-gray-500">
-          Not a member?{' '}
-          <Link to="/signup" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            create a new account
-          </Link>
-        </p>
+        <div className="mt-8 text-center text-xs text-gray-500">
+          <p>By continuing, you agree to our Terms of Service</p>
+        </div>
       </div>
     </div>
-  </>
   );
 }

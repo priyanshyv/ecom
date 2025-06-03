@@ -1,8 +1,15 @@
 import { useSelector, useDispatch } from 'react-redux';
+import { StarIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { ShoppingBagIcon } from "@heroicons/react/24/solid";
+
 import {
   fetchAllProductsAsync,
   fetchAllProductsByFiltersAsync,
+  fetchBrandsAsync,
+  fetchCategoriesAsync,
   selectAllProducts,
+  selectBrands,
+  selectCategories,
   selectTotalItems,
 } from '../ProductSlice';
 import { useEffect, useState } from 'react'
@@ -19,10 +26,11 @@ import {
   MenuItems,
 } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon, StarIcon } from '@heroicons/react/20/solid'
+import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/react/20/solid'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { Link } from 'react-router-dom';
 import { ITEMS_PER_PAGE } from '../../../app/constants';
+import { fetchBrands, fetchCategories } from '../ProductAPI';
 
 const items = [
   { id: 1, title: 'Back End Developer', department: 'Engineering', type: 'Full-time', location: 'Remote' },
@@ -36,47 +44,31 @@ const sortOptions = [
   { name: 'Price: High to Low', sort: 'price', order: 'desc', current: false },
 ];
 
-const filters = [
-  {
-    id: 'brand',
-    name: 'Brands',
-    options: [
-      { value: 'Essence', label: 'Essence', checked: false },
-      { value: 'Glamour Beauty', label: 'Glamour Beauty', checked: false },
-      { value: 'Velvet Touch', label: 'Velvet Touch', checked: false },
-      { value: 'Chic Cosmetics', label: 'Chic Cosmetics', checked: false },
-      { value: 'Nail Couture', label: 'Nail Couture', checked: false },
-      { value: 'Calvin Klein', label: 'Calvin Klein', checked: false },
-      { value: 'Chanel', label: 'Chanel', checked: false },
-      { value: 'Dior', label: 'Dior', checked: false },
-      { value: 'Dolce & Gabbana', label: 'Dolce & Gabbana', checked: false },
-      { value: 'Gucci', label: 'Gucci', checked: false },
-      { value: 'Annibale Colombo', label: 'Annibale Colombo', checked: false },
-      { value: 'Furniture Co.', label: 'Furniture Co.', checked: false },
-      { value: 'Knoll', label: 'Knoll', checked: false },
-      { value: 'Bath Trends', label: 'Bath Trends', checked: false },
-    ],
-  },
-  {
-    id: 'category',
-    name: 'Category',
-    options: [
-      { value: 'beauty', label: 'beauty', checked: false },
-      { value: 'fragrances', label: 'fragrances', checked: false },
-      { value: 'furniture', label: 'furniture', checked: false },
-      { value: 'groceries', label: 'groceries', checked: false }
-    ],
-  }
-]
+
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function ProductList() {
+export default function ProductList({ isNavbarHovered = false }) {
+  const brands = useSelector(selectBrands);
+  const categories = useSelector(selectCategories);
   const dispatch = useDispatch();
   const products = useSelector(selectAllProducts);
   const totalItems = useSelector(selectTotalItems);
+
+  const filters = [
+    {
+      id: 'brand',
+      name: 'Brands',
+      options: brands
+    },
+    {
+      id: 'category',
+      name: 'Category',
+      options: categories
+    }
+  ]
 
   const [filter, setFilter] = useState({});
   const [sort, setSort] = useState({});
@@ -140,13 +132,20 @@ export default function ProductList() {
     setPage(1)
   }, [totalItems, sort])
 
+useEffect(()=>{
+  dispatch(fetchBrandsAsync())
+  dispatch(fetchCategoriesAsync())
+},[])
+
   return (
+    
     <div className="bg-white">
       <div>
         <MobileFilter
           handleFilter={handleFilter}
           mobileFiltersOpen={mobileFiltersOpen}
           setMobileFiltersOpen={setMobileFiltersOpen}
+          filters={filters}
         />
 
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -216,7 +215,7 @@ export default function ProductList() {
             </h2>
 
             <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
-              <DesktopFilter handleFilter={handleFilter} />
+              <DesktopFilter handleFilter={handleFilter} filters={filters} />
               <div className="lg:col-span-3">
                 <ProductGrid products={products} />
               </div>
@@ -241,6 +240,7 @@ function MobileFilter({
   mobileFiltersOpen,
   setMobileFiltersOpen,
   handleFilter,
+  filters
 }) {
   return (
     <Dialog open={mobileFiltersOpen} onClose={setMobileFiltersOpen} className="relative z-40 lg:hidden">
@@ -321,7 +321,7 @@ function MobileFilter({
   );
 }
 
-function DesktopFilter({ handleFilter }) {
+function DesktopFilter({ handleFilter ,filters }) {
   return (
     <form className="hidden lg:block">
       {filters.map((section) => (
@@ -452,54 +452,83 @@ function Pagination({ page, setPage, handlePage, handlePrevPage, handleNextPage,
 }
 
 function ProductGrid({ products }) {
-  console.log('Products data:', products.data);
-  // const productArray = Array.isArray(products) 
-  //   ? products 
-  //   : [];
-
-  // if (productArray.length === 0) {
-  //   return (
-  //     <div className="text-center py-10">
-  //       <p>No products available</p>
-  //     </div>
-  //   );
-  // }
   return (
     <div className="bg-white">
-      <div className="mx-auto max-w-2xl px-4 py-0 sm:px-6 sm:py-0 lg:max-w-7xl lg:px-8">
-        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.data?.map((product) => (
-            <Link to={`/product-detail/${product.id}`} key={product.id}>
-              <div className="group relative border-solid border-2 p-2 border-gray-200">
-                <div className="min-h-60 aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-60">
+            <Link 
+              to={`/product-detail/${product.id}`} 
+              key={product.id} 
+              className="group block overflow-hidden"
+            >
+              {/* Clean White Card with Subtle Accents */}
+              <div className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-pink-100">
+                
+                {/* Image Container */}
+                <div className="relative h-64 w-full overflow-hidden bg-gray-50">
                   <img
                     src={product.thumbnail}
                     alt={product.title}
-                    className="h-full w-full object-cover object-center lg:h-full lg:w-full"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
+                  
+                  {/* Subtle Discount Badge */}
+                  {product.discountPercentage > 0 && (
+                    <div className="absolute top-3 right-3 bg-pink-50 text-pink-600 text-xs font-medium px-2 py-1 rounded-full border border-pink-100">
+                      {Math.round(product.discountPercentage)}% OFF
+                    </div>
+                  )}
                 </div>
-                <div className="mt-4 flex justify-between">
-                  <div>
-                    <h3 className="text-sm text-gray-700">
-                      <span aria-hidden="true" className="absolute inset-0" />
-                      {product.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      <StarIcon className="w-6 h-6 inline" />
-                      <span className="align-bottom">{product.rating}</span>
-                    </p>
+
+                {/* Product Details */}
+                <div className="p-4">
+                  <div className="flex items-center mb-2">
+                    <div className="flex mr-1">
+                      {[...Array(5)].map((_, i) => (
+                        <StarIcon 
+                          key={i} 
+                          className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {product.rating.toFixed(1)}
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-sm block font-medium text-gray-900">
-                      $
-                      {Math.round(
-                        product.price * (1 - product.discountPercentage / 100)
+
+                  <h3 className="text-md font-medium text-gray-800 mb-2 line-clamp-2">
+                    {product.title}
+                  </h3>
+
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <p className="text-lg font-semibold text-gray-900">
+                        ${Math.round(product.price * (1 - product.discountPercentage / 100))}
+                      </p>
+                      {product.discountPercentage > 0 && (
+                        <p className="text-sm line-through text-gray-400">
+                          ${product.price}
+                        </p>
                       )}
-                    </p>
-                    <p className="text-sm block line-through font-medium text-gray-400">
-                      ${product.price}
-                    </p>
+                    </div>
+                    
+                    {/* Neutral Action Button */}
+                    <button 
+                      className="text-gray-400 hover:text-pink-300 transition-colors"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <HeartIcon className="w-5 h-5" />
+                    </button>
                   </div>
+                </div>
+
+                {/* Subtle Add to Cart Bar */}
+                <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-center">
+                  <button className="text-pink-400 hover:text-pink-500 text-sm font-medium flex items-center space-x-1">
+                    <ShoppingBagIcon className="w-4 h-4" />
+                    <span>Quick Add</span>
+                  </button>
                 </div>
               </div>
             </Link>

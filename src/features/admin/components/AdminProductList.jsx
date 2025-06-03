@@ -18,7 +18,8 @@ import {
   MenuItem,
   MenuItems,
 } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon } from "@heroicons/react/24/outline";
+
 import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon, StarIcon } from '@heroicons/react/20/solid'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { Link } from 'react-router-dom';
@@ -492,14 +493,18 @@ function ProductGrid({ products = [] }) {
                       </p>
                     </div>
                   </div>
+                {product.deleted &&<div>
+                  <p className='tect-sm text-red-400'>product deleted</p>
+                </div>}
                 </div>
               </Link>
               <div className="flex justify-center my-5">
-                <button 
+                <Link 
+                to={`/admin/product-form/edit/${product.id}`}
                   className="px-4 py-2 rounded-md bg-indigo-600 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors duration-200"
                 >
                   Edit Product
-                </button>
+                </Link>
               </div>
             </div>
           ))}
