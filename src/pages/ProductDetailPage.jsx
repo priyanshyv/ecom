@@ -5,11 +5,11 @@ import ProductReview from '../features/product/components/ProductReview'
 
 const ProductDetailPage = () => {
   return (
-    <div>
+    <div className='bg-pink-50'>
         <Navbar>
             <ProductDetail></ProductDetail>
             {/* review ko page ko dynamic bana na pending hai */}
-            <ProductReview></ProductReview>
+            {/* <ProductReview></ProductReview> */}
         </Navbar>
     </div>
   )

@@ -24,6 +24,10 @@ import AdminProductDetailPage from './pages/AdminProductDetailPage';
 import AdminProductFormPage from './pages/AdminProductFormPage';
 import AdminOrders from './features/admin/components/AdminOrders';
 import AdminOrdersPage from './pages/AdminOrdersPage';
+import ProtectedSeller from './features/auth/components/ProtectedSeller';
+import SellerHome from './pages/SellerHome';
+import SellerProductDetailPage from './pages/SellerProductDetailPage';
+import SellerProductFormPage from './pages/SellerProductFormPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -32,6 +36,10 @@ const router = createBrowserRouter([
   {
     path: "/admin",
     element:(<ProtectedAdmin><AdminHome></AdminHome></ProtectedAdmin>),
+  },
+  {
+    path: "/seller",
+    element:(<ProtectedSeller><SellerHome></SellerHome></ProtectedSeller>),
   },
   {
     path: "/login",
@@ -58,16 +66,32 @@ const router = createBrowserRouter([
     element:(<ProtectedAdmin><AdminProductDetailPage></AdminProductDetailPage></ProtectedAdmin>),
   },
   {
+    path: "/seller/product-detail/:id",
+    element:(<ProtectedSeller><SellerProductDetailPage></SellerProductDetailPage></ProtectedSeller>),
+  },
+  {
     path: "/admin/orders",
     element:(<ProtectedAdmin><AdminOrdersPage/></ProtectedAdmin>),
   },
+  // {
+  //   path: "/seller/orders",
+  //   element:(<ProtectedAdmin><AdminOrdersPage/></ProtectedAdmin>),
+  // },
   {
     path: "/admin/product-form",
     element:(<ProtectedAdmin><AdminProductFormPage/></ProtectedAdmin>),
   },
   {
+    path: "/seller/product-form",
+    element:(<ProtectedSeller><SellerProductFormPage/></ProtectedSeller>),
+  },
+  {
     path: "/admin/product-form/edit/:id",
     element:(<ProtectedAdmin><AdminProductFormPage/></ProtectedAdmin>),
+  },
+  {
+    path: "/seller/product-form/edit/:id",
+    element:(<ProtectedSeller><SellerProductFormPage/></ProtectedSeller>),
   },
   {
     path: "/order-success/:id",

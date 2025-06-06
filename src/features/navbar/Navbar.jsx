@@ -5,13 +5,15 @@ import { Link } from 'react-router-dom'
 import { selectItems } from '../cart/CartSlice'
 import { logout, selectLoggedInUser } from '../auth/AuthSlice'
 import { useState } from 'react'
+
 const navigation = [
   { name: 'HOME', link: '/', current: true, user: true },
-  { name: 'INDJAM WEAR', link: '#', current: false, user: true },
   { name: 'SHOP BY SPECIALITY', link: '#', current: false, user: true },
   { name: 'CRAFT STORIES', link: '#', current: false, user: true },
-  { name: 'Orders', link: '/admin/orders', current: false, admin: true },
-  { name: 'Admin', link: '/admin', current: false, admin: true },
+  { name: 'ALL ORDERS', link: '/admin/orders', current: false, admin: true },
+  { name: 'ADMIN', link: '/admin', current: false, admin: true },
+  { name: 'SELLER DASHBOARD', link: '/seller', current: false, seller: true },
+  { name: 'MY ORDERS', link: '/seller/orders', current: false, seller: true },
 ];
 
 const userNavigation = [
@@ -34,6 +36,14 @@ const Navbar = ({children}) => {
     dispatch(logout());
   };
 
+  // Filter navigation based on user role
+  const filteredNavigation = navigation.filter(item => {
+    if (item.user) return true;
+    if (item.admin && user?.role === 'admin') return true;
+    if (item.seller && user?.role === 'seller') return true;
+    return false;
+  });
+
   return (
     <div className="min-h-full relative">
       <Disclosure as="nav" className="bg-pink-100 border-b border-gray-200">
@@ -47,19 +57,17 @@ const Navbar = ({children}) => {
 
               <div className="hidden md:block ml-10">
                 <div className="flex items-center space-x-10">
-                  {navigation.map((item) => (
-                    (item.user || (item.admin && user?.role === 'admin')) && (
-                      <Link
-                        key={item.name}
-                        to={item.link}
-                        className={classNames(
-                          item.current ? 'text-gray-900 border-b-2 border-gray-500' : 'text-gray-700 hover:text-gray-900',
-                          'px-1 py-2 text-sm font-medium'
-                        )}
-                      >
-                        {item.name}
-                      </Link>
-                    )
+                  {filteredNavigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.link}
+                      className={classNames(
+                        item.current ? 'text-gray-900 border-b-2 border-gray-500' : 'text-gray-700 hover:text-gray-900',
+                        'px-1 py-2 text-sm font-medium'
+                      )}
+                    >
+                      {item.name}
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -75,19 +83,21 @@ const Navbar = ({children}) => {
                   />
                 </div>
 
-                <Link to="/cart">
-                  <button
-                    type="button"
-                    className="relative text-gray-700 hover:text-gray-900"
-                  >
-                    <ShoppingCartIcon aria-hidden="true" className="size-6" />
-                    {items.length > 0 && (
-                      <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-indigo-500 px-1.5 py-0.5 text-xs font-medium text-white">
-                        {items.length}
-                      </span>
-                    )}
-                  </button>
-                </Link>
+                { (
+                  <Link to="/cart">
+                    <button
+                      type="button"
+                      className="relative text-gray-700 hover:text-gray-900"
+                    >
+                      <ShoppingCartIcon aria-hidden="true" className="size-6" />
+                      {items.length > 0 && (
+                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-indigo-500 px-1.5 py-0.5 text-xs font-medium text-white">
+                          {items.length}
+                        </span>
+                      )}
+                    </button>
+                  </Link>
+                )}
 
                 <Menu as="div" className="relative">
                   {({ open }) => {
@@ -139,7 +149,7 @@ const Navbar = ({children}) => {
 
         <DisclosurePanel className="md:hidden">
           <div className="space-y-1 px-2 pt-2 pb-3">
-            {navigation.map((item) => (
+            {filteredNavigation.map((item) => (
               <DisclosureButton
                 key={item.name}
                 as={Link}
@@ -164,19 +174,21 @@ const Navbar = ({children}) => {
                 <div className="text-base font-medium text-gray-800">{user?.name || 'User'}</div>
                 <div className="text-sm font-medium text-gray-500">{user?.email || ''}</div>
               </div>
-              <Link to="/cart" className="ml-auto">
-                <button
-                  type="button"
-                  className="relative text-gray-700 hover:text-gray-900"
-                >
-                  <ShoppingCartIcon aria-hidden="true" className="size-6" />
-                  {items.length > 0 && (
-                    <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-indigo-500 px-1.5 py-0.5 text-xs font-medium text-white">
-                      {items.length}
-                    </span>
-                  )}
-                </button>
-              </Link>
+              {user?.role !== 'seller' && (
+                <Link to="/cart" className="ml-auto">
+                  <button
+                    type="button"
+                    className="relative text-gray-700 hover:text-gray-900"
+                  >
+                    <ShoppingCartIcon aria-hidden="true" className="size-6" />
+                    {items.length > 0 && (
+                      <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-indigo-500 px-1.5 py-0.5 text-xs font-medium text-white">
+                        {items.length}
+                      </span>
+                    )}
+                  </button>
+                </Link>
+              )}
             </div>
             <div className="mt-3 space-y-1 px-2">
               {userNavigation.map((item) => (
